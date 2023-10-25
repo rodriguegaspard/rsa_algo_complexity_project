@@ -2,8 +2,9 @@
 # It compares the performance of those three algorithms using Timeit (more information on : https://docs.python.org/3/library/timeit.html#module-timeit)
 import timeit
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 
-test_array = [random.randint(1, 100) for _ in range(20)]
 
 def partition(number_list, left, right, pivot_index):
     pivot = number_list[pivot_index]
@@ -33,10 +34,10 @@ def quickSelect(number_list, left, right, k, function_number = 0):
     else:
         return quickSelect(number_list, pivot_index + 1, right, k) 
 
-def findKthSmallestQuickSelect(function_number = 0, number_list = [random.randint(1, 1000) for _ in range(1000)], k = random.randint(0, len(test_array) - 1)):
+def findKthSmallestQuickSelect(function_number = 0, number_list = [random.randint(1, 1000) for _ in range(1000)], k = random.randint(0, 999)):
     return quickSelect(number_list, 0, len(number_list) - 1, k, function_number)
 
-def findKthSmallestQuickSelectPerformanceTest():
+def findKthSmallestPerformanceTest():
     # Left index as the pivot
     left_index_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(1), number=10000, globals=globals())
     # Right index as the pivot
@@ -48,8 +49,20 @@ def findKthSmallestQuickSelectPerformanceTest():
     print("RIGHT PIVOT : " + str(right_index_performance) + " seconds.")
     print("RANDOM PIVOT : " + str(random_index_performance) + " seconds.")
 
-findKthSmallestQuickSelectPerformanceTest()
+def findKthSmallestBenchmarkGraph(increment, max_range):
+    x = []
+    y = []
+    i = increment
+    print("Benchmark in progress. this may take a while.")
+    while i <= max_range:
+        x.append(i)
+        y.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=1, globals=globals()))
+        i += increment
+    fig, ax = plt.subplots()
+    ax.plot(x, y)
+    plt.show()
 
+findKthSmallestBenchmarkGraph(10,10000)
 #random_array = [random.randint(1, 100) for _ in range(20)]
 #prompt = random.randint(0, 19)
 #print("\nPROMPT = " + str(prompt))
