@@ -2,7 +2,6 @@
 # It compares the performance of those three algorithms using Timeit (more information on : https://docs.python.org/3/library/timeit.html#module-timeit)
 import timeit
 import random
-import pdb
 
 test_array = [random.randint(1, 100) for _ in range(20)]
 
@@ -17,10 +16,15 @@ def partition(number_list, left, right, pivot_index):
     number_list[right], number_list[partition_index] = number_list[partition_index], number_list[right]
     return partition_index
 
-def quickSelect(number_list, left, right, k, starting_pivot = None):
+def quickSelect(number_list, left, right, k, function_number = 0):
     if left == right: # If there's only one element in the subset, return it.
         return number_list[left]
-    pivot_index = random.randint(left, right) if starting_pivot is None else starting_pivot # Determines the pivot. If no starting pivot is specified, it is choosed at random. 
+    # Pivot decision. By default, the pivot is chosen at random between one of the elements of the current subset.
+    pivot_strategy = { 0 : random.randint(left, right),
+                       1 : left,
+                       2 : right,
+    }
+    pivot_index = pivot_strategy[function_number] 
     pivot_index = partition(number_list, left, right, pivot_index)
     if pivot_index == k : # If the pivot index is equal to k, we found the kth smallest.
         return number_list[k]
@@ -29,18 +33,29 @@ def quickSelect(number_list, left, right, k, starting_pivot = None):
     else:
         return quickSelect(number_list, pivot_index + 1, right, k) 
 
-def findKthSmallestQuickSelect(number_list = test_array, k = random.randint(0, len(test_array) - 1)):
-    return quickSelect(number_list, 0, len(number_list) - 1, k)
+def findKthSmallestQuickSelect(function_number = 0, number_list = [random.randint(1, 1000) for _ in range(1000)], k = random.randint(0, len(test_array) - 1)):
+    return quickSelect(number_list, 0, len(number_list) - 1, k, function_number)
 
-runtime_performance = timeit.timeit(stmt=findKthSmallestQuickSelect, number=10000, globals=globals())
-print(f"This took {runtime_performance} seconds for 10000 loops.")
+def findKthSmallestQuickSelectPerformanceTest():
+    # Left index as the pivot
+    left_index_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(1), number=10000, globals=globals())
+    # Right index as the pivot
+    right_index_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(2), number=10000, globals=globals())
+    # Random pivot (between left and right indexes)
+    random_index_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(), number=10000, globals=globals())
+    print("QUICK SELECT ALGORITHM : PERFORMANCE TEST (RANDOM ARRAY OF SIZE 1000, RANDOM K, 10000 LOOPS)")
+    print("LEFT PIVOT : " + str(left_index_performance) + " seconds.")
+    print("RIGHT PIVOT : " + str(right_index_performance) + " seconds.")
+    print("RANDOM PIVOT : " + str(random_index_performance) + " seconds.")
 
-random_array = [random.randint(1, 100) for _ in range(20)]
-prompt = random.randint(0, 19)
-print("\nPROMPT = " + str(prompt))
-kth_smallest = findKthSmallestQuickSelect(random_array, prompt)
-for n in random_array:
-    print(n, end=" ")
-print()
-sorted_test = sorted(random_array)
-print(str(sorted_test[prompt]) + " = " +  str(kth_smallest) + " ? " + str(sorted_test[prompt] == kth_smallest)) 
+findKthSmallestQuickSelectPerformanceTest()
+
+#random_array = [random.randint(1, 100) for _ in range(20)]
+#prompt = random.randint(0, 19)
+#print("\nPROMPT = " + str(prompt))
+#kth_smallest = findKthSmallestQuickSelect(random_array, prompt)
+#for n in random_array:
+#    print(n, end=" ")
+#print()
+#sorted_test = sorted(random_array)
+#print(str(sorted_test[prompt]) + " = " +  str(kth_smallest) + " ? " + str(sorted_test[prompt] == kth_smallest)) 
