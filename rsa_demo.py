@@ -51,15 +51,24 @@ def findKthSmallestPerformanceTest():
 
 def findKthSmallestBenchmarkGraph(increment, max_range):
     x = []
-    y = []
+    left_pivot = []
+    right_pivot = []
+    random_pivot = []
     i = increment
     print("Benchmark in progress. this may take a while.")
     while i <= max_range:
         x.append(i)
-        y.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=1, globals=globals()))
+        left_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(1, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=1, globals=globals())*1000)
+        right_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(2, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=1, globals=globals())*1000)
+        random_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=1, globals=globals())*1000)
         i += increment
     fig, ax = plt.subplots()
-    ax.plot(x, y)
+    ax.set_xlabel("Size of randomized list")
+    ax.set_ylabel("Time in milliseconds")
+    ax.plot(x, left_pivot, 'r.', label="Left pivot")
+    ax.plot(x, right_pivot, 'g.', label="Right pivot")
+    ax.plot(x, random_pivot, 'b.', label="Random pivot (between left and right)")
+    plt.legend()
     plt.show()
 
 findKthSmallestBenchmarkGraph(10,10000)
