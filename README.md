@@ -3,7 +3,7 @@ Unikl MIIT Master of Computer Science - Project
 
 # HOW TO USE
 
-You can find a Linux executable in the dist folder, or you can run rsa_demo.py directly by executing the following commands
+Execute the following commands :
 
 '''
 python -m venv .
@@ -13,7 +13,3 @@ pip install requirements.txt
 python rsa_demo.exe
 '''
 
-To create your own executable (you will find it in the dist folder by default)
-'''
-pyinstaller --onefile rsa_demo.py
-'''
