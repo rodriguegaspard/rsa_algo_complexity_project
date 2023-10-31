@@ -2,6 +2,7 @@
 # It compares the performance of those three algorithms using Timeit (more information on : https://docs.python.org/3/library/timeit.html#module-timeit)
 import timeit
 import random
+import matplotlib.pyplot as plt
 
 def partition(number_list, left, right, pivot_index):
     pivot = number_list[pivot_index]
@@ -69,6 +70,37 @@ def findKthSmallestPerformanceTest():
     print("INTROSELECT ALGORITHM - SUBSET SIZE SUM CHECK (THRESHOLD = 5): " + str(intro_sum_performance) + " seconds.")
     print("INTROSELECT ALGORITHM - SUBSET SIZE REDUCTION CHECK (THRESHOLD = 5) : " + str(intro_reduction_performance) + " seconds.")
 
+def findKthSmallestBenchmarkGraph(increment=10, max_range=10000, repetitions=1, low_threshold=10, high_threshold=50):
+    x = []
+    random_pivot = []
+    median_of_medians = []
+    intro_sum_low_threshold = []
+    intro_sum_high_threshold = []
+    intro_reduction_low_threshold = []
+    intro_reduction_high_threshold = []
+    i = increment
+    print("Benchmark in progress. this may take a while.")
+    while i <= max_range:
+        x.append(i)
+        random_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        median_of_medians.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect("Median of medians", None, 0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        intro_sum_low_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", low_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        intro_sum_high_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", high_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        intro_reduction_low_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size reduction", low_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        intro_reduction_high_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size reduction", high_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        i += increment
+    fig, ax = plt.subplots()
+    ax.set_xlabel("Size of randomized list")
+    ax.set_ylabel("Time in milliseconds")
+    ax.plot(x, random_pivot, 'b', alpha=0.5, label="Random pivot (between left and right)")
+    ax.plot(x, median_of_medians, 'r', alpha=0.5, label="Median of medians algorithm")
+    ax.plot(x, intro_sum_low_threshold, 'y', alpha=0.5,  label="Introselect low threshold (Subset size sum strategy)")
+    ax.plot(x, intro_sum_high_threshold, 'g', alpha=0.5, label="Introselect high threshold (Subset size sum strategy)")
+    ax.plot(x, intro_reduction_low_threshold, 'c', alpha=0.5, label="Introselect low threshold (Subset size reduction strategy)")
+    ax.plot(x, intro_reduction_high_threshold, 'm', alpha=0.5, label="Introselect high threshold (Subset size reduction strategy)")
+    plt.legend()
+    plt.show()
+
 def correctDistance(distance, distances):
     if (type(distance) is not int) or (distance < 1):
         print("Incorrect value. Please try again.")
@@ -102,13 +134,14 @@ Please choose algorithm to use :
         print("Incorrect value. Please enter a number between 1 and 4")
         algorithm_selection = int(input())
 
-    print("Enter desired k value for the kth nearest house (between 1 and 7) :")
+    print("Enter desired k value for the kth nearest house :")
     k = input()
     k = int(k) - 1
     while (not k) or (int(k) < 0) or (int(k) > 6):
         print("Incorrect k value. Please enter a new value for k.")
         k = input()
         k = int(k) - 1
+
     distances_temp = distances
     if algorithm_selection == 1:
         result = findKthSmallestQuickSelect(None, None, 1, distances_temp, int(k))
@@ -141,3 +174,5 @@ Enter selection :""")
 
 if __name__ == "__main__":
     main()
+#findKthSmallestPerformanceTest()
+#findKthSmallestBenchmarkGraph(10,10000, 1)
