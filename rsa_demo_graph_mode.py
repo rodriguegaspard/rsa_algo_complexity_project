@@ -44,7 +44,7 @@ def medianOfMedians(number_list, left, right):
 def quickSelect(number_list, left, right, k, pivot_strategy = None, switching_strategy = None, threshold = 1, subset_size_list = []):
     if left == right: # If there's only one element in the subset, return it.
         return number_list[left]
-    if switching_strategy:
+    if not switching_strategy:
         pivot_strategy = "Median of medians" if switchStrategy(switching_strategy, threshold, number_list, left, right, subset_size_list) else pivot_strategy
     # Pivot decision. By default, the pivot is chosen at random between one of the elements of the current subset.
     pivot_index = pivotStrategy(pivot_strategy, number_list, left, right)
@@ -52,9 +52,9 @@ def quickSelect(number_list, left, right, k, pivot_strategy = None, switching_st
     if pivot_index == k : # If the pivot index is equal to k, we found the kth smallest.
         return number_list[k]
     elif k < pivot_index:   # If the pivot is bigger than k, look for it in the right subset. Else, look for it in the left subset.
-        return quickSelect(number_list, left, pivot_index - 1, k, pivot_strategy, threshold, subset_size_list)
+        return quickSelect(number_list, left, pivot_index - 1, k, pivot_strategy, switching_strategy, threshold, subset_size_list)
     else:
-        return quickSelect(number_list, pivot_index + 1, right, k, pivot_strategy, threshold, subset_size_list)
+        return quickSelect(number_list, pivot_index + 1, right, k, pivot_strategy, switching_strategy, threshold, subset_size_list)
 
 def findKthSmallestQuickSelect(pivot_strategy = None, switching_strategy = None, threshold = 1, number_list = [random.randint(1, 10000) for _ in range(10000)], k = random.randint(0, 9999)):
     return quickSelect(number_list, 0, len(number_list) - 1, k, pivot_strategy, switching_strategy, threshold)
@@ -70,7 +70,7 @@ def findKthSmallestPerformanceTest():
     print("INTROSELECT ALGORITHM - SUBSET SIZE SUM CHECK (THRESHOLD = 5): " + str(intro_sum_performance) + " seconds.")
     print("INTROSELECT ALGORITHM - SUBSET SIZE REDUCTION CHECK (THRESHOLD = 5) : " + str(intro_reduction_performance) + " seconds.")
 
-def findKthSmallestBenchmarkGraph(increment=10, max_range=10000, repetitions=1, low_threshold=10, high_threshold=50):
+def findKthSmallestBenchmarkGraph(increment=10, max_range=100000, repetitions=1, low_threshold=20, high_threshold=200):
     x = []
     random_pivot = []
     median_of_medians = []
@@ -78,11 +78,11 @@ def findKthSmallestBenchmarkGraph(increment=10, max_range=10000, repetitions=1, 
     intro_sum_high_threshold = []
     intro_reduction_low_threshold = []
     intro_reduction_high_threshold = []
-    i = increment
-    print("Benchmark in progress. this may take a while.")
+    i = 1
+    print("Benchmark in progress.. this may take a while.")
     while i <= max_range:
         x.append(i)
-        random_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
+        random_pivot.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, None, 0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
         median_of_medians.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect("Median of medians", None, 0, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
         intro_sum_low_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", low_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
         intro_sum_high_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", high_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
@@ -90,14 +90,15 @@ def findKthSmallestBenchmarkGraph(increment=10, max_range=10000, repetitions=1, 
         intro_reduction_high_threshold.append(timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size reduction", high_threshold, [random.randint(1, i) for _ in range(i)], random.randint(0, i - 1)), number=repetitions, globals=globals())*1000)
         i += increment
     fig, ax = plt.subplots()
-    ax.set_xlabel("Size of randomized list")
+    ax.set_xlabel("Threshold value")
     ax.set_ylabel("Time in milliseconds")
-    ax.plot(x, random_pivot, 'b', alpha=0.5, label="Random pivot (between left and right)")
-    ax.plot(x, median_of_medians, 'r', alpha=0.5, label="Median of medians algorithm")
-    ax.plot(x, intro_sum_low_threshold, 'y', alpha=0.5,  label="Introselect low threshold (Subset size sum strategy)")
-    ax.plot(x, intro_sum_high_threshold, 'g', alpha=0.5, label="Introselect high threshold (Subset size sum strategy)")
-    ax.plot(x, intro_reduction_low_threshold, 'c', alpha=0.5, label="Introselect low threshold (Subset size reduction strategy)")
-    ax.plot(x, intro_reduction_high_threshold, 'm', alpha=0.5, label="Introselect high threshold (Subset size reduction strategy)")
+    ax.set_title("Time performance comparison of different implementations of the quickselect algorithm")
+    ax.plot(x, random_pivot, 'b.', alpha=0.25, label="Random pivot (between left and right)")
+    ax.plot(x, median_of_medians, 'r.', alpha=0.25, label="Median of medians algorithm")
+    ax.plot(x, intro_sum_low_threshold, 'y.', alpha=0.25, label="Introselect (Subset size sum strategy)")
+    ax.plot(x, intro_sum_high_threshold, 'g.', alpha=0.25, label="Introselect high threshold (Subset size sum strategy)")
+    ax.plot(x, intro_reduction_low_threshold, 'c.', alpha=0.25, label="Introselect (Subset size reduction strategy)")
+    ax.plot(x, intro_reduction_high_threshold, 'm.', alpha=0.25, label="Introselect high threshold (Subset size reduction strategy)")
     plt.legend()
     plt.show()
 
@@ -161,6 +162,7 @@ What do you want to do?
 -----------------------
 1) - House problem
 2) - Benchmark performance test
+3) - Graph Mode
 -----------------------
 
 Enter selection :""")
@@ -169,10 +171,10 @@ Enter selection :""")
         houseProblem()
     elif selection == 2:
         findKthSmallestPerformanceTest()
+    elif selection == 3:
+        findKthSmallestBenchmarkGraph(10,10000,5,50)
     else:
         print("Nothing to do!")
 
 if __name__ == "__main__":
     main()
-#findKthSmallestPerformanceTest()
-#findKthSmallestBenchmarkGraph(10,10000, 1)

@@ -43,7 +43,7 @@ def medianOfMedians(number_list, left, right):
 def quickSelect(number_list, left, right, k, pivot_strategy = None, switching_strategy = None, threshold = 1, subset_size_list = []):
     if left == right: # If there's only one element in the subset, return it.
         return number_list[left]
-    if switching_strategy:
+    if not switching_strategy:
         pivot_strategy = "Median of medians" if switchStrategy(switching_strategy, threshold, number_list, left, right, subset_size_list) else pivot_strategy
     # Pivot decision. By default, the pivot is chosen at random between one of the elements of the current subset.
     pivot_index = pivotStrategy(pivot_strategy, number_list, left, right)
@@ -51,9 +51,9 @@ def quickSelect(number_list, left, right, k, pivot_strategy = None, switching_st
     if pivot_index == k : # If the pivot index is equal to k, we found the kth smallest.
         return number_list[k]
     elif k < pivot_index:   # If the pivot is bigger than k, look for it in the right subset. Else, look for it in the left subset.
-        return quickSelect(number_list, left, pivot_index - 1, k, pivot_strategy, threshold, subset_size_list)
+        return quickSelect(number_list, left, pivot_index - 1, k, pivot_strategy, switching_strategy, threshold, subset_size_list)
     else:
-        return quickSelect(number_list, pivot_index + 1, right, k, pivot_strategy, threshold, subset_size_list)
+        return quickSelect(number_list, pivot_index + 1, right, k, pivot_strategy, switching_strategy, threshold, subset_size_list)
 
 def findKthSmallestQuickSelect(pivot_strategy = None, switching_strategy = None, threshold = 1, number_list = [random.randint(1, 10000) for _ in range(10000)], k = random.randint(0, 9999)):
     return quickSelect(number_list, 0, len(number_list) - 1, k, pivot_strategy, switching_strategy, threshold)
@@ -61,13 +61,13 @@ def findKthSmallestQuickSelect(pivot_strategy = None, switching_strategy = None,
 def findKthSmallestPerformanceTest():
     random_index_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(), number=100, globals=globals())
     moms_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect("Median of medians"), number=100, globals=globals())
-    intro_sum_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", 5), number=100, globals=globals())
-    intro_reduction_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size reduction", 5), number=100, globals=globals())
+    intro_sum_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size sum", 50), number=100, globals=globals())
+    intro_reduction_performance = timeit.timeit(stmt=lambda : findKthSmallestQuickSelect(None, "Subset size reduction", 50), number=100, globals=globals())
     print("QUICK SELECT ALGORITHM : PERFORMANCE TEST (RANDOM ARRAY OF SIZE 10000, RANDOM K, 100 LOOPS)")
     print("RANDOM PIVOT : " + str(random_index_performance) + " seconds.")
     print("MEDIAN OF MEDIANS : " + str(moms_performance) + " seconds.")
-    print("INTROSELECT ALGORITHM - SUBSET SIZE SUM CHECK (THRESHOLD = 5): " + str(intro_sum_performance) + " seconds.")
-    print("INTROSELECT ALGORITHM - SUBSET SIZE REDUCTION CHECK (THRESHOLD = 5) : " + str(intro_reduction_performance) + " seconds.")
+    print("INTROSELECT ALGORITHM - SUBSET SIZE SUM CHECK (THRESHOLD = 50): " + str(intro_sum_performance) + " seconds.")
+    print("INTROSELECT ALGORITHM - SUBSET SIZE REDUCTION CHECK (THRESHOLD = 50) : " + str(intro_reduction_performance) + " seconds.")
 
 def correctDistance(distance, distances):
     if (type(distance) is not int) or (distance < 1):
